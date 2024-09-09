@@ -1,0 +1,6 @@
+@JWTCrudWebAPI_HostAddress = http://localhost:5105
+
+GET {{JWTCrudWebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
