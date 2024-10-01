@@ -1,9 +1,11 @@
 ﻿
 using JWTCrudWebAPI.Data;
+using JWTCrudWebAPI.Interfaces;
 using JWTCrudWebAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace EmployeeAdminWebAPI.Controllers
 {
@@ -13,26 +15,38 @@ namespace EmployeeAdminWebAPI.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private readonly SecondDbContext dbContext;
-        public EmployeesController(SecondDbContext dbContext)
+        private readonly IEmployeeRepository employeeRepository;
+
+        public EmployeesController(IEmployeeRepository employeeRepository)
         {
-            this.dbContext = dbContext;
+            this.employeeRepository = employeeRepository;
         }
         [Authorize]
         [HttpGet("GetAllEmployees")]
        
         public IActionResult GetAllEmployees()
         {
-            var allEmployees = dbContext.Employees.ToList();
+            var allEmployees = employeeRepository.GetAllEmployees();
             return Ok(allEmployees);
         }
-        
+
+        [Authorize]
+        [HttpGet("GetAllEmployeesname")]
+        public IActionResult GetAllEmployeesname()
+        {
+            var allEmployees = employeeRepository.GetAllEmployeesname();
+            return Ok(allEmployees);
+        }
+
+
+
+
         [Authorize]
         [HttpGet]
         [Route("{id:guid}")]
         public IActionResult GetEmployeesById(Guid id)
         {
-            var employee = dbContext.Employees.Find(id);
+            var employee = employeeRepository.GetEmployeesById(id);
             if (employee == null)
             {
                 return NotFound();
@@ -51,8 +65,8 @@ namespace EmployeeAdminWebAPI.Controllers
                 Phone = addEmployeeDto.Phone,
                 Salary = addEmployeeDto.Salary
             };
-            dbContext.Employees.Add(employeeEntity);
-            dbContext.SaveChanges();
+            employeeRepository.AddEmployee(employeeEntity);
+            employeeRepository.SaveChanges();
             return Ok(employeeEntity);
         }
         [Authorize]
@@ -60,7 +74,7 @@ namespace EmployeeAdminWebAPI.Controllers
         [Route("{id:guid}")]
         public IActionResult UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
         {
-            var employee = dbContext.Employees.Find(id);
+            var employee = employeeRepository.GetEmployeesById(id);
             if (employee == null)
             {
                 return NotFound();
@@ -69,7 +83,8 @@ namespace EmployeeAdminWebAPI.Controllers
             employee.Email = updateEmployeeDto.Email;
             employee.Phone = updateEmployeeDto.Phone;
             employee.Salary = updateEmployeeDto.Salary;
-            dbContext.SaveChanges();
+            employeeRepository.UpdateEmployee(employee);
+            employeeRepository.SaveChanges();
             return Ok(employee);
         }
 
@@ -78,13 +93,13 @@ namespace EmployeeAdminWebAPI.Controllers
         [Route("{id:guid}")]
         public IActionResult DeleteEmployee(Guid id)
         {
-            var employee = dbContext.Employees.Find(id);
+            var employee = employeeRepository.GetEmployeesById(id);
             if (employee == null)
             {
                 return NotFound();
             }
-            dbContext.Employees.Remove(employee);
-            dbContext.SaveChanges();
+            employeeRepository.DeleteEmployee(employee);
+            employeeRepository.SaveChanges();
             return Ok();
         }
     }
