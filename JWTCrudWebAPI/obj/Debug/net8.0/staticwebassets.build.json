@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "6WqDucEL1OpOaAOUqQfcdxjR0wQ1XFvd/QMRylTtj/Y=",
+  "Source": "JWTCrudWebAPI",
+  "BasePath": "_content/JWTCrudWebAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
