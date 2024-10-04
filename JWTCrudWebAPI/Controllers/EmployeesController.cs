@@ -167,10 +167,10 @@ namespace EmployeeAdminWebAPI.Controllers
      
 
         [HttpGet]
-        [Route("Images/{ImageId:int}")]
-        public IActionResult GetImagesByImageId(int ImageId)
+        [Route("Images/{imageId:int}")]
+        public IActionResult GetImagesByImageId(int imageId)
         {
-            var images = employeeRepository.GetImagesByImageId(ImageId);
+            var images = employeeRepository.GetImagesByImageId(imageId);
             if (images == null || !images.Any())
             {
                 return NotFound("No images found for the specified employee.");
@@ -180,10 +180,38 @@ namespace EmployeeAdminWebAPI.Controllers
             var imageDtos = images.Select(image => new ImageDTO
             {
                Id= image.Id,
-               Base64Image = Convert.ToBase64String(image.Base64Image) // Assuming Base64Image is a byte[]
+               Base64Image = Convert.ToBase64String(image.Base64Image), // Assuming Base64Image is a byte[]
+               ImageId=image.ImageId
+            });
+
+            return Ok(imageDtos);
+        }
+
+
+
+
+
+        [HttpGet]
+        [Route("Employee/{Id:guid}/Images")]
+        public IActionResult GetImagesByEmployeeId(Guid Id)
+        {
+            var images = employeeRepository.GetImagesByEmployeeId(Id);
+            if (images == null || !images.Any())
+            {
+                return NotFound("No images found for the specified employee.");
+            }
+
+            var imageDtos = images.Select(image => new ImageDTO
+            {
+                ImageId = image.ImageId,
+                Base64Image = Convert.ToBase64String(image.Base64Image), // Assuming Base64Image is a byte[]
+                Id= image.Id
             }).ToList();
 
             return Ok(imageDtos);
         }
+
+
+
     }
 }

@@ -51,9 +51,9 @@ namespace JWTCrudWebAPI.Repositories
            return dbContext.Images.Where(e => e.Id == id).ToList();
         }
 
-        public IEnumerable<Image> GetImagesByImageId(int ImageId)
+        public IEnumerable<Image> GetImagesByImageId(int imageId)
         {
-            return dbContext.Images.Where(e => e.ImageId == ImageId).ToList();
+            return dbContext.Images.Where(e => e.ImageId == imageId).ToList();
         }
 
         public void SaveChanges()

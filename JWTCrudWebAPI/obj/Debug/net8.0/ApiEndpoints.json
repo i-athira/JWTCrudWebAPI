@@ -86,6 +86,22 @@
   },
   {
     "ContainingType": "EmployeeAdminWebAPI.Controllers.EmployeesController",
+    "Method": "GetImagesByEmployeeId",
+    "RelativePath": "api/Employees/Employee/{Id}/Images",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EmployeeAdminWebAPI.Controllers.EmployeesController",
     "Method": "GetAllEmployees",
     "RelativePath": "api/Employees/GetAllEmployees",
     "HttpMethod": "GET",
@@ -107,13 +123,13 @@
   {
     "ContainingType": "EmployeeAdminWebAPI.Controllers.EmployeesController",
     "Method": "GetImagesByImageId",
-    "RelativePath": "api/Employees/Images/{ImageId}",
+    "RelativePath": "api/Employees/Images/{imageId}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "ImageId",
+        "Name": "imageId",
         "Type": "System.Int32",
         "IsRequired": true
       }
