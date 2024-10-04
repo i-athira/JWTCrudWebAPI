@@ -18,6 +18,11 @@ namespace JWTCrudWebAPI.Repositories
             dbContext.Employees.Add(employee);
         }
 
+        public void AddImage(Image image)
+        {
+            dbContext.Images.Add(image);
+        }
+
         public void DeleteEmployee(Employee employee)
         {
             dbContext.Employees.Remove(employee);
@@ -39,6 +44,16 @@ namespace JWTCrudWebAPI.Repositories
         public Employee GetEmployeesById(Guid id)
         {
             return dbContext.Employees.Find(id);
+        }
+
+        public IEnumerable<Image> GetImagesByEmployeeId(Guid id)
+        {
+           return dbContext.Images.Where(e => e.Id == id).ToList();
+        }
+
+        public IEnumerable<Image> GetImagesByImageId(int ImageId)
+        {
+            return dbContext.Images.Where(e => e.ImageId == ImageId).ToList();
         }
 
         public void SaveChanges()

@@ -1,22 +1,6 @@
 [
   {
     "ContainingType": "EmployeeAdminWebAPI.Controllers.EmployeesController",
-    "Method": "GetEmployeesById",
-    "RelativePath": "api/Employees/{id}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Guid",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "EmployeeAdminWebAPI.Controllers.EmployeesController",
     "Method": "UpdateEmployee",
     "RelativePath": "api/Employees/{id}",
     "HttpMethod": "PUT",
@@ -70,6 +54,38 @@
   },
   {
     "ContainingType": "EmployeeAdminWebAPI.Controllers.EmployeesController",
+    "Method": "AddImage",
+    "RelativePath": "api/Employees/AddImage",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "imageDTO",
+        "Type": "JWTCrudWebAPI.Models.ImageDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EmployeeAdminWebAPI.Controllers.EmployeesController",
+    "Method": "GetEmployeesById",
+    "RelativePath": "api/Employees/Employee/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EmployeeAdminWebAPI.Controllers.EmployeesController",
     "Method": "GetAllEmployees",
     "RelativePath": "api/Employees/GetAllEmployees",
     "HttpMethod": "GET",
@@ -86,6 +102,22 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EmployeeAdminWebAPI.Controllers.EmployeesController",
+    "Method": "GetImagesByImageId",
+    "RelativePath": "api/Employees/Images/{ImageId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ImageId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {

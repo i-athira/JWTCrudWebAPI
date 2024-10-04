@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("JWTCrudWebAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6250a4fb384bdcaef566bdc864ed4f398cd536dd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e164cb91f59f472c93a1c9b1e2b77246cc106d52")]
 [assembly: System.Reflection.AssemblyProductAttribute("JWTCrudWebAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("JWTCrudWebAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
