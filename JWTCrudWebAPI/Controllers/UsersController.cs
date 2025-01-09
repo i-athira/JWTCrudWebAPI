@@ -209,12 +209,6 @@ namespace JWTCrudWebAPI.Controllers
 
 
 
-
-
-
-
-
-
         [HttpGet]
         [Route("GetUsers")]
         public IActionResult GetUsers()

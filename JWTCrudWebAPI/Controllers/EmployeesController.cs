@@ -30,6 +30,7 @@ namespace EmployeeAdminWebAPI.Controllers
             return Ok(allEmployees);
         }
 
+
         [Authorize]
         [HttpGet("GetAllEmployeesname")]
         public IActionResult GetAllEmployeesname()

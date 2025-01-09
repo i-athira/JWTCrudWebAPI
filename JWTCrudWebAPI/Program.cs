@@ -9,11 +9,22 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp",
+        policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(e => e.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDbContext<SecondDbContext>(e => e.UseSqlServer(builder.Configuration.GetConnectionString("SecondConnection")));
+
 builder.Services.AddScoped< IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddControllers();
+
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -96,4 +107,5 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers(); // This is required for attribute routing
 });
+app.UseCors("AllowAngularApp");
 app.Run();
