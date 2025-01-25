@@ -1,10 +1,12 @@
-﻿using JWTCrudWebAPI.Data;
+﻿using Azure.Core;
+using JWTCrudWebAPI.Data;
 using JWTCrudWebAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 
 using System.Security.Claims;
@@ -19,40 +21,58 @@ namespace JWTCrudWebAPI.Controllers
     {
         private readonly ApplicationDbContext dbContext;
         private readonly IConfiguration configuration;
-        public UsersController(ApplicationDbContext dbContext,IConfiguration configuration)
+        private readonly ILogger<UsersController> logger;
+
+        public UsersController(ApplicationDbContext dbContext,IConfiguration configuration, ILogger<UsersController> logger)
         {
             this.dbContext = dbContext;
             this.configuration = configuration;
+            this.logger = logger;
         }
 
         [HttpPost]
         [Route("Registration")]
-        public IActionResult Registration(UserDto userDto)
+        public async Task<IActionResult> Registration(UserDto userDto)
         {
+            logger.LogInformation("Registration attempt for email: {Email}", userDto.Email);
+
             if (!ModelState.IsValid)
             {
+                logger.LogWarning("Registration failed due to invalid model state.");
+
                 return BadRequest(ModelState);
 
             }
-            var objUser = dbContext.Users.FirstOrDefault(x => x.Email == userDto.Email);
+            var objUser =await dbContext.Users.FirstOrDefaultAsync(x => x.Email == userDto.Email);
             if (objUser == null)
             {
-                var refreshToken = GenerateRefreshToken();
-                var refreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // Set refresh token expiry to 7 days
-
-
-
-                dbContext.Users.Add(new User
+                try
                 {
-                    Firstname = userDto.Firstname,
-                    Lastname = userDto.Lastname,
-                    Email = userDto.Email,
-                    Password = userDto.Password,
-                    RefreshToken = refreshToken,
-                    RefreshTokenExpiryTime = refreshTokenExpiryTime
-                });
-                dbContext.SaveChanges();
-                return Ok("User registered successfully");
+                    var refreshToken = GenerateRefreshToken();
+                    var refreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // Set refresh token expiry to 7 days
+
+
+
+                    await dbContext.Users.AddAsync(new User
+                    {
+                        Firstname = userDto.Firstname,
+                        Lastname = userDto.Lastname,
+                        Email = userDto.Email,
+                        Password = userDto.Password,
+                        RefreshToken = refreshToken,
+                        RefreshTokenExpiryTime = refreshTokenExpiryTime
+                    });
+                    await dbContext.SaveChangesAsync();
+                    logger.LogInformation("User registered successfully: {Email}", userDto.Email);
+
+                    return Ok("User registered successfully");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error occurred during user registration for email: {Email}", userDto.Email);
+                    return StatusCode(500, "An error occurred while registering the user.");
+
+                }
             }
             else
             {
@@ -101,23 +121,32 @@ namespace JWTCrudWebAPI.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public IActionResult Login(LoginDto loginDto)
+        public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            var user = dbContext.Users.FirstOrDefault(x => x.Email == loginDto.Email && x.Password == loginDto.Password);
+            logger.LogInformation("Login attempt for email: {Email}", loginDto.Email);
+
+            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email && x.Password == loginDto.Password);
             if (user != null)
             {
+                try
+                {
+                    var accessToken = GenerateAccessToken(user);
+                    var refreshToken = GenerateRefreshToken();
 
-                var accessToken = GenerateAccessToken(user);
-                var refreshToken = GenerateRefreshToken();
 
+                    // Store refresh token and expiry time
+                    user.RefreshToken = refreshToken;
+                    user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                    await dbContext.SaveChangesAsync();
+                    logger.LogInformation("Login successful for email: {Email}", loginDto.Email);
 
-                // Store refresh token and expiry time
-                user.RefreshToken = refreshToken;
-                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-                dbContext.SaveChanges();
-
-                return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken });
-
+                    return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken });
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error occurred during login for email: {Email}", loginDto.Email);
+                    return StatusCode(500, "An error occurred while processing the login request.");
+                }
             }
 
             return NoContent();
@@ -127,27 +156,39 @@ namespace JWTCrudWebAPI.Controllers
 
         [HttpPost]
         [Route("RefreshToken")]
-        public IActionResult RefreshToken([FromBody] TokenRequest tokenRequest)
+        public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
         {
-            var principal = GetPrincipalFromExpiredToken(tokenRequest.AccessToken);
-            var email = principal.FindFirstValue("Email");
-
-            var user = dbContext.Users.FirstOrDefault(u => u.Email == email);
-
-            if (user == null || user.RefreshToken != tokenRequest.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            logger.LogInformation("Refresh token attempt for access token.");
+            try
             {
-                return Unauthorized("Invalid refresh token or token expired");
+                var principal = GetPrincipalFromExpiredToken(tokenRequest.AccessToken);
+                var email = principal.FindFirstValue("Email");
+
+                var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+                if (user == null || user.RefreshToken != tokenRequest.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                {
+                    logger.LogWarning("Invalid refresh token or token expired for email: {Email}", email);
+
+                    return Unauthorized("Invalid refresh token or token expired");
+                }
+
+                // Generate new tokens
+                var newAccessToken = GenerateAccessToken(user);
+                var newRefreshToken = GenerateRefreshToken();
+
+                user.RefreshToken = newRefreshToken;
+                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                await dbContext.SaveChangesAsync();
+                logger.LogInformation("Refresh token successful for email: {Email}", email);
+
+                return Ok(new { AccessToken = newAccessToken, RefreshToken = newRefreshToken });
             }
-
-            // Generate new tokens
-            var newAccessToken = GenerateAccessToken(user);
-            var newRefreshToken = GenerateRefreshToken();
-
-            user.RefreshToken = newRefreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            dbContext.SaveChanges();
-
-            return Ok(new { AccessToken = newAccessToken, RefreshToken = newRefreshToken });
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred during token refresh.");
+                return StatusCode(500, "An error occurred while refreshing the token.");
+            }
         }
 
 
@@ -211,23 +252,38 @@ namespace JWTCrudWebAPI.Controllers
 
         [HttpGet]
         [Route("GetUsers")]
-        public IActionResult GetUsers()
+        public async Task<IActionResult> GetUsers()
         {
-            return Ok(dbContext.Users.ToList());
+            logger.LogInformation("Fetching all users.");
+
+            var users = await dbContext.Users.ToListAsync();
+            return Ok(users);
         }
 
         [Authorize]
         [HttpGet]
         [Route("GetUser")]
-        public IActionResult GetUser(int id)
+        public async Task<IActionResult> GetUser(int id)
         {
-            var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
-            if (user != null)
-          
-                return Ok(user);
-            else
-                return NoContent();
+            logger.LogInformation("Fetching user with ID: {Id}", id);
 
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user != null)
+
+            {
+                logger.LogInformation("User found with ID: {Id}", id);
+
+                return Ok(user);
+            }
+               
+            else
+            {
+                logger.LogWarning("No user found with ID: {Id}", id);
+                return NoContent();
+            }
         }
     }
 }
+//Used logger.LogInformation() to log successful operations.
+//Used logger.LogWarning() for warnings(e.g., invalid requests).
+//Used logger.LogError() to log exceptions.

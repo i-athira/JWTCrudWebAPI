@@ -5,6 +5,7 @@ using JWTCrudWebAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Linq;
 
 namespace EmployeeAdminWebAPI.Controllers
@@ -16,27 +17,51 @@ namespace EmployeeAdminWebAPI.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeRepository employeeRepository;
+        private readonly ILogger<EmployeesController> logger;
 
-        public EmployeesController(IEmployeeRepository employeeRepository)
+        public EmployeesController(IEmployeeRepository employeeRepository, ILogger<EmployeesController> logger)
         {
             this.employeeRepository = employeeRepository;
+            this.logger = logger;
         }
         [Authorize]
         [HttpGet("GetAllEmployees")]
        
-        public IActionResult GetAllEmployees()
+        public async Task<IActionResult> GetAllEmployees()
         {
-            var allEmployees = employeeRepository.GetAllEmployees();
+            logger.LogInformation("GetAllEmployees method called.");
+            var allEmployees = await employeeRepository.GetAllEmployees();
+
+            if (allEmployees == null || !allEmployees.Any())
+            {
+                logger.LogWarning("No employees found.");
+                return NotFound();
+            }
+
+            logger.LogInformation($"Fetched {allEmployees.Count()} employees successfully.");
             return Ok(allEmployees);
+
         }
 
 
         [Authorize]
         [HttpGet("GetAllEmployeesname")]
-        public IActionResult GetAllEmployeesname()
+        public async Task<IActionResult> GetAllEmployeesname()
         {
-            var allEmployees = employeeRepository.GetAllEmployeesname();
-            return Ok(allEmployees);
+            logger.LogInformation("GetAllEmployeesname method called.");
+            try
+            {
+
+                var allEmployees = await employeeRepository.GetAllEmployeesname();
+                logger.LogInformation("Fetched employee names successfully.");
+
+                return Ok(allEmployees);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while fetching employees.");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
 
@@ -45,120 +70,205 @@ namespace EmployeeAdminWebAPI.Controllers
         [Authorize]
         [HttpGet]
         [Route("Employee/{id:guid}")]
-        public IActionResult GetEmployeesById(Guid id)
+        public async Task<IActionResult> GetEmployeesById(Guid id)
         {
-            var employee = employeeRepository.GetEmployeesById(id);
-            if (employee == null)
+            logger.LogInformation("GetEmployeesById method called with ID: {Id}", id);
+            try
             {
-                return NotFound();
+                var employee =await employeeRepository.GetEmployeesById(id);
+                if (employee == null)
+                {
+                    logger.LogWarning("Employee with ID: {Id} not found.", id);
+
+                    return NotFound();
+                }
+                logger.LogInformation("Employee with ID: {Id} fetched successfully.", id);
+
+                return Ok(employee);
+
             }
-            return Ok(employee);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while fetching employee with ID: {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
         [Authorize]
         [HttpPost]
         [Route("AddEmployee")]
-        public IActionResult AddEmployee(AddEmployeeDto addEmployeeDto)
+        public async Task<IActionResult> AddEmployee(AddEmployeeDto addEmployeeDto)
         {
-            var employeeEntity = new Employee()
+            logger.LogInformation("AddEmployee method called.");
+            try
             {
-                Name = addEmployeeDto.Name,
-                Email = addEmployeeDto.Email,
-                Phone = addEmployeeDto.Phone,
-                Salary = addEmployeeDto.Salary
-            };
-            employeeRepository.AddEmployee(employeeEntity);
-            employeeRepository.SaveChanges();
-            return Ok(employeeEntity);
+                var employeeEntity = new Employee()
+                {
+                    Name = addEmployeeDto.Name,
+                    Email = addEmployeeDto.Email,
+                    Phone = addEmployeeDto.Phone,
+                    Salary = addEmployeeDto.Salary
+                };
+                await employeeRepository.AddEmployee(employeeEntity);
+                await employeeRepository.SaveChanges();
+                logger.LogInformation("Employee added successfully with ID: {Id}", employeeEntity.Id);
+                return Ok(employeeEntity);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while adding employee.");
+                return StatusCode(500, "Internal server error");
+            }
         }
         [Authorize]
         [HttpPut]
         [Route("{id:guid}")]
-        public IActionResult UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
+        public async Task<IActionResult> UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
         {
-            var employee = employeeRepository.GetEmployeesById(id);
-            if (employee == null)
+            logger.LogInformation("UpdateEmployee method called for ID: {Id}", id);
+
+            try
             {
-                return NotFound();
+                var employee = await employeeRepository.GetEmployeesById(id);
+                if (employee == null)
+                {
+                    logger.LogWarning("Employee with ID: {Id} not found for update.", id);
+                    return NotFound();
+                }
+
+                // Only update Name if it is provided (null check)
+              
+
+                // Only update Email if it is provided (null check)
+                if (!string.IsNullOrEmpty(updateEmployeeDto.Email))
+                {
+                    employee.Email = updateEmployeeDto.Email;
+                }
+
+                // Only update Phone if it is provided (null check)
+                if (!string.IsNullOrEmpty(updateEmployeeDto.Phone))
+                {
+                    employee.Phone = updateEmployeeDto.Phone;
+                }
+
+                // Only update Salary if it is provided (null check) and not zero (optional validation)
+                if (updateEmployeeDto.Salary.HasValue)
+                {
+                    employee.Salary = updateEmployeeDto.Salary.Value;
+                }
+
+                // Save updated employee
+                await employeeRepository.UpdateEmployee(employee);
+                await employeeRepository.SaveChanges();
+
+                logger.LogInformation("Employee with ID: {Id} updated successfully.", id);
+                return Ok(employee);
             }
-            employee.Name = updateEmployeeDto.Name;
-            employee.Email = updateEmployeeDto.Email;
-            employee.Phone = updateEmployeeDto.Phone;
-            employee.Salary = updateEmployeeDto.Salary;
-            employeeRepository.UpdateEmployee(employee);
-            employeeRepository.SaveChanges();
-            return Ok(employee);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while updating employee with ID: {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
-      
         [HttpDelete]
         [Route("{id:guid}")]
-        public IActionResult DeleteEmployee(Guid id)
+        public async Task<IActionResult> DeleteEmployee(Guid id)
         {
-            var employee = employeeRepository.GetEmployeesById(id);
-            if (employee == null)
+            logger.LogInformation("DeleteEmployee method called for ID: {Id}", id);
+            try
             {
-                return NotFound();
+                var employee = await employeeRepository.GetEmployeesById(id);
+                if (employee == null)
+                {
+                    logger.LogWarning("Employee with ID: {Id} not found for deletion.", id);
+
+                    return NotFound();
+                }
+                await employeeRepository.DeleteEmployee(employee);
+                await employeeRepository.SaveChanges();
+                logger.LogInformation("Employee with ID: {Id} deleted successfully.", id);
+
+                return Ok();
             }
-            employeeRepository.DeleteEmployee(employee);
-            employeeRepository.SaveChanges();
-            return Ok();
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while deleting employee with ID: {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
 
         [HttpPost]
         [Route("AddImage")]
-        public IActionResult AddImage(ImageDTO imageDTO)
+        public async Task<IActionResult> AddImage(ImageDTO imageDTO)
         {
-
-
-            if (!ModelState.IsValid)
+            logger.LogInformation("AddImage method called.");
+            try
             {
-                return BadRequest(ModelState);
+
+                if (!ModelState.IsValid)
+            {
+                    logger.LogWarning("Invalid model state for AddImage.");
+
+                    return BadRequest(ModelState);
             }
 
             // Validate the base64 string format
             if (string.IsNullOrEmpty(imageDTO.Base64Image))
-            {
-                return BadRequest("Base64 image string cannot be empty.");
+                {
+                    logger.LogWarning("Base64 image string is empty.");
+
+                    return BadRequest("Base64 image string cannot be empty.");
             }
 
-          
 
-            try
-            {
-                // Convert base64 string to byte[]
-                byte[] imageData = Convert.FromBase64String(imageDTO.Base64Image);
 
-                // Create a new Image entity
-                var imageentity = new Image
+                try
                 {
-                   
-                    Id = imageDTO.Id,
-                    Base64Image = imageData  // Assign the converted byte array here
-                };
+                    // Convert base64 string to byte[]
+                    byte[] imageData = Convert.FromBase64String(imageDTO.Base64Image);
 
-                employeeRepository.AddImage(imageentity); // Add the image to the repository
-                employeeRepository.SaveChanges();// Save changes and retrieve ImageId
-                // Check if ImageId is being populated correctly
-                if (imageentity.ImageId == 0)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError, "Failed to retrieve the ImageId.");
+                    // Create a new Image entity
+                    var imageentity = new Image
+                    {
+
+                        Id = imageDTO.Id,
+                        Base64Image = imageData  // Assign the converted byte array here
+                    };
+
+                    await employeeRepository.AddImage(imageentity); // Add the image to the repository
+                    await employeeRepository.SaveChanges();// Save changes and retrieve ImageId
+                                                           // Check if ImageId is being populated correctly
+                    if (imageentity.ImageId == 0)
+                    {
+                        logger.LogError("Failed to retrieve the ImageId after saving.");
+
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Failed to retrieve the ImageId.");
+                    }
+
+                    logger.LogInformation("Image uploaded successfully with ImageId: {ImageId}", imageentity.ImageId);
+
+                    // Return the ImageId in the response
+                    var response = new
+                    {
+                        imageid = imageentity.ImageId,  // Get the generated ImageId
+                        Message = "Image uploaded successfully."
+                    };
+
+                    return Ok(response);
                 }
-
-
-                // Return the ImageId in the response
-                var response = new
+                catch (FormatException)
                 {
-                    imageid = imageentity.ImageId,  // Get the generated ImageId
-                    Message = "Image uploaded successfully."
-                };
+                    logger.LogWarning("Invalid base64 string format.");
 
-                return Ok(response);
+                    return BadRequest("Invalid base64 string format.");
+                }
             }
 
-            catch (FormatException)
+            catch (Exception ex)
             {
-                return BadRequest("Invalid base64 string format.");
+                logger.LogError(ex, "Error occurred while uploading the image.");
+                return StatusCode(500, "Internal server error");
             }
 
 
@@ -169,23 +279,35 @@ namespace EmployeeAdminWebAPI.Controllers
 
         [HttpGet]
         [Route("Images/{imageId:int}")]
-        public IActionResult GetImagesByImageId(int imageId)
+        public async Task<IActionResult> GetImagesByImageId(int imageId)
         {
-            var images = employeeRepository.GetImagesByImageId(imageId);
-            if (images == null || !images.Any())
+            logger.LogInformation("GetImagesByImageId method called with ImageId: {ImageId}", imageId);
+            try
             {
-                return NotFound("No images found for the specified employee.");
+                var images = await employeeRepository.GetImagesByImageId(imageId);
+                if (images == null || !images.Any())
+                {
+                    logger.LogWarning("No images found for ImageId: {ImageId}", imageId);
+
+                    return NotFound("No images found for the specified employee.");
+                }
+
+                // Assuming 'images' is a collection of entities that include ImageId and the Blob data
+                var imageDtos = images.Select(image => new ImageDTO
+                {
+                    Id = image.Id,
+                    Base64Image = Convert.ToBase64String(image.Base64Image), // Assuming Base64Image is a byte[]
+                    ImageId = image.ImageId
+                });
+                logger.LogInformation("{Count} images retrieved for ImageId: {ImageId}", images.Count(), imageId);
+
+                return Ok(imageDtos);
             }
-
-            // Assuming 'images' is a collection of entities that include ImageId and the Blob data
-            var imageDtos = images.Select(image => new ImageDTO
+            catch (Exception ex)
             {
-               Id= image.Id,
-               Base64Image = Convert.ToBase64String(image.Base64Image), // Assuming Base64Image is a byte[]
-               ImageId=image.ImageId
-            });
-
-            return Ok(imageDtos);
+                logger.LogError(ex, "Error occurred while fetching images for ImageId: {ImageId}", imageId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
 
@@ -194,22 +316,33 @@ namespace EmployeeAdminWebAPI.Controllers
 
         [HttpGet]
         [Route("Employee/{Id:guid}/Images")]
-        public IActionResult GetImagesByEmployeeId(Guid Id)
+        public async Task<IActionResult> GetImagesByEmployeeId(Guid Id)
         {
-            var images = employeeRepository.GetImagesByEmployeeId(Id);
-            if (images == null || !images.Any())
+            logger.LogInformation("GetImagesByEmployeeId method called with EmployeeId: {EmployeeId}", Id);
+            try
             {
-                return NotFound("No images found for the specified employee.");
+                var images = await employeeRepository.GetImagesByEmployeeId(Id);
+                if (images == null || !images.Any())
+                {
+                    logger.LogWarning("No images found for EmployeeId: {EmployeeId}", Id);
+                    return NotFound("No images found for the specified employee.");
+                }
+
+                var imageDtos = images.Select(image => new ImageDTO
+                {
+                    ImageId = image.ImageId,
+                    Base64Image = Convert.ToBase64String(image.Base64Image), // Assuming Base64Image is a byte[]
+                    Id = image.Id
+                }).ToList();
+                logger.LogInformation("{Count} images retrieved for EmployeeId: {EmployeeId}", imageDtos.Count, Id);
+
+                return Ok(imageDtos);
             }
-
-            var imageDtos = images.Select(image => new ImageDTO
+            catch (Exception ex)
             {
-                ImageId = image.ImageId,
-                Base64Image = Convert.ToBase64String(image.Base64Image), // Assuming Base64Image is a byte[]
-                Id= image.Id
-            }).ToList();
-
-            return Ok(imageDtos);
+                logger.LogError(ex, "Error occurred while fetching images for EmployeeId: {EmployeeId}", Id);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
 

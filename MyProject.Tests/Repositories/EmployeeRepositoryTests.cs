@@ -19,66 +19,75 @@ namespace MyProject.Tests.Repositories
             return new SecondDbContext(options);   
         }
         [Fact]
-        public void AddEmployee_ShouldAddEmployee()
+        public async Task AddEmployee_ShouldAddEmployee()
         {
-            var dbContext=CreateDbContext();
-            var repository=new EmployeeRepository(dbContext);
-            var employee=new Employee { Id = Guid.NewGuid(), Name = "John Doe", Email = "abc@gmail.com",Phone= "6765543411",Salary=100000 };
-            repository.AddEmployee(employee);
-            repository.SaveChanges();
-            var employees = dbContext.Employees.ToList();
+            var dbContext = CreateDbContext();
+            var repository = new EmployeeRepository(dbContext);
+            var employee = new Employee
+            {
+                Id = Guid.NewGuid(),
+                Name = "John Doe",
+                Email = "abc@gmail.com",
+                Phone = "6765543411",
+                Salary = 100000
+            };
+
+            await repository.AddEmployee(employee);
+            await repository.SaveChanges();  // Ensure SaveChangesAsync is used for async operations
+
+            var employees = await dbContext.Employees.ToListAsync();  // Use ToListAsync for async fetching
             Assert.Single(employees);
             Assert.Equal("John Doe", employees.First().Name);
         }
 
         [Fact]
 
-        public void GetAllEmployees_ShouldReturnAllEmployees()
+        public async Task GetAllEmployees_ShouldReturnAllEmployees()
         {
             var dbContext = CreateDbContext();
             var repository = new EmployeeRepository(dbContext);
 
             dbContext.Employees.AddRange(
-                         new Employee { Id = Guid.NewGuid(), Name = "Alice", Email = "bbc@gmail.com",Phone= "6865543411",Salary=10000 },
-                         new Employee { Id = Guid.NewGuid(), Name = "Bob", Email = "bob@gmail.com", Phone = "6869543411", Salary = 100000 }
+                new Employee { Id = Guid.NewGuid(), Name = "Alice", Email = "bbc@gmail.com", Phone = "6865543411", Salary = 10000 },
+                new Employee { Id = Guid.NewGuid(), Name = "Bob", Email = "bob@gmail.com", Phone = "6869543411", Salary = 100000 }
             );
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();  // Use async version of SaveChanges
 
-            var employees = repository.GetAllEmployees();
+
+            var employees = await repository.GetAllEmployees();
 
             Assert.Equal(2, employees.Count());
             Assert.Contains(employees, e => e.Name == "Alice");
             Assert.Contains(employees, e => e.Name == "Bob");
         }
         [Fact]
-        public void GetEmployeesById_ShouldReturnEmployee_WhenEmployeeExists()
+        public async Task GetEmployeesById_ShouldReturnEmployee_WhenEmployeeExists()
         {
             var dbContext = CreateDbContext();
             var repository = new EmployeeRepository(dbContext);
 
             var employeeId = Guid.NewGuid();
             dbContext.Employees.Add(new Employee { Id = employeeId, Name = "John Doe", Email = "abc@gmail.com", Phone = "6765543411", Salary = 100000 });
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
-            var employee = repository.GetEmployeesById(employeeId);
+            var employee = await repository.GetEmployeesById(employeeId);
 
             Assert.NotNull(employee);
             Assert.Equal("John Doe", employee.Name);
         }
         [Fact]
-        public void DeleteEmployee_ShouldRemoveEmployeeFromDatabase()
+        public async Task DeleteEmployee_ShouldRemoveEmployeeFromDatabase()
         {
             var dbContext = CreateDbContext();
             var repository = new EmployeeRepository(dbContext);
 
             var employee = new Employee { Id = Guid.NewGuid(), Name = "John Doe", Email = "abc@gmail.com", Phone = "6765543411", Salary = 100000 };
             dbContext.Employees.Add(employee);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
-            repository.DeleteEmployee(employee);
-            repository.SaveChanges();
-
-            var employees = dbContext.Employees.ToList();
+            await repository.DeleteEmployee(employee);
+            await repository.SaveChanges();
+            var employees = await dbContext.Employees.ToListAsync();
             Assert.Empty(employees);
         }
 

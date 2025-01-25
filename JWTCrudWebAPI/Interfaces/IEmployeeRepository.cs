@@ -1,20 +1,21 @@
 ﻿using JWTCrudWebAPI.Models;
+using System.Threading.Tasks;
 
 namespace JWTCrudWebAPI.Interfaces
 {
     public interface IEmployeeRepository
     {
-        IEnumerable<Employee> GetAllEmployees();
-        Employee GetEmployeesById(Guid id);
-        IEnumerable<Employee> GetAllEmployeesname();
+        Task<IEnumerable<Employee>> GetAllEmployees();
+        Task<Employee> GetEmployeesById(Guid id);
+        Task<IEnumerable<Employee>> GetAllEmployeesname();
 
-        IEnumerable<Image> GetImagesByEmployeeId(Guid id);
-        IEnumerable<Image> GetImagesByImageId(int ImageId);
-        void AddImage(Image image);
+        Task<IEnumerable<Image>> GetImagesByEmployeeId(Guid id);
+        Task<IEnumerable<Image>> GetImagesByImageId(int ImageId);
+        Task AddImage(Image image);
 
-        void AddEmployee(Employee employee);
-        void UpdateEmployee(Employee employee);
-        void DeleteEmployee(Employee employee);
-        void SaveChanges();
+        Task AddEmployee(Employee employee);
+        Task UpdateEmployee(Employee employee);
+        Task DeleteEmployee(Employee employee);
+        Task SaveChanges();
     }
 }

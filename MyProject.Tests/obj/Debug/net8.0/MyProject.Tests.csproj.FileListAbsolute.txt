@@ -1,4 +1,11 @@
 D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\bin\Debug\net8.0\CoverletSourceRootsMapping_MyProject.Tests
+D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.csproj.AssemblyReference.cache
+D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MvcTestingAppManifest.json
+D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.GeneratedMSBuildEditorConfig.editorconfig
+D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.AssemblyInfoInputs.cache
+D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.AssemblyInfo.cs
+D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.csproj.CoreCompileInputs.cache
+D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.sourcelink.json
 D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\bin\Debug\net8.0\testhost.dll
 D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\bin\Debug\net8.0\JWTCrudWebAPI.deps.json
 D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\bin\Debug\net8.0\JWTCrudWebAPI.runtimeconfig.json
@@ -455,13 +462,6 @@ D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\bin\Debug\net8
 D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\bin\Debug\net8.0\JWTCrudWebAPI.dll
 D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\bin\Debug\net8.0\JWTCrudWebAPI.pdb
-D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.csproj.AssemblyReference.cache
-D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MvcTestingAppManifest.json
-D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.GeneratedMSBuildEditorConfig.editorconfig
-D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.AssemblyInfoInputs.cache
-D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.AssemblyInfo.cs
-D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.csproj.CoreCompileInputs.cache
-D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.sourcelink.json
 D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProjec.5FBC1BAD.Up2Date
 D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\MyProject.Tests.dll
 D:\source\repos\EmployeeAdminWebAPI\JWTCrudWebAPI\MyProject.Tests\obj\Debug\net8.0\refint\MyProject.Tests.dll

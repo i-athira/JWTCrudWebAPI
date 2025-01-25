@@ -1,6 +1,7 @@
 ﻿using JWTCrudWebAPI.Data;
 using JWTCrudWebAPI.Interfaces;
 using JWTCrudWebAPI.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace JWTCrudWebAPI.Repositories
@@ -13,57 +14,61 @@ namespace JWTCrudWebAPI.Repositories
         {
             this.dbContext = dbContext;
         }
-        public void AddEmployee(Employee employee)
+        public async Task AddEmployee(Employee employee)
         {
-            dbContext.Employees.Add(employee);
+           await dbContext.Employees.AddAsync(employee);
         }
 
-        public void AddImage(Image image)
+        public async Task AddImage(Image image)
         {
-            dbContext.Images.Add(image);
+            await dbContext.Images.AddAsync(image);
         }
 
-        public void DeleteEmployee(Employee employee)
+        public async Task DeleteEmployee(Employee employee)
         {
             dbContext.Employees.Remove(employee);
+            await Task.CompletedTask;
         }
 
-        public IEnumerable<Employee> GetAllEmployees()
+        public async Task<IEnumerable<Employee>> GetAllEmployees()
         {
-            return dbContext.Employees.ToList();
+            return await dbContext.Employees.ToListAsync();
         }
 
-        public IEnumerable<Employee> GetAllEmployeesname()
+        public async Task<IEnumerable<Employee>> GetAllEmployeesname()
         {
-            return dbContext.Employees
-                      .Where(e => e.Name.StartsWith("A") )
-                      .OrderBy(e => e.Name)
-                      .ToList();
+            return await dbContext.Employees
+                 .Where(e => e.Name.StartsWith("A"))
+                 .OrderBy(e => e.Name)
+                 .ToListAsync();
         }
 
-        public Employee GetEmployeesById(Guid id)
+        public async Task<Employee> GetEmployeesById(Guid id)
         {
-            return dbContext.Employees.Find(id);
+            return await dbContext.Employees.FindAsync(id);
         }
 
-        public IEnumerable<Image> GetImagesByEmployeeId(Guid id)
+        public async Task<IEnumerable<Image>> GetImagesByEmployeeId(Guid id)
         {
-           return dbContext.Images.Where(e => e.Id == id).ToList();
+           return await dbContext.Images.Where(e => e.Id == id).ToListAsync();
         }
 
-        public IEnumerable<Image> GetImagesByImageId(int imageId)
+        public async Task<IEnumerable<Image>> GetImagesByImageId(int imageId)
         {
-            return dbContext.Images.Where(e => e.ImageId == imageId).ToList();
+            return await dbContext.Images.Where(e => e.ImageId == imageId).ToListAsync();
         }
 
-        public void SaveChanges()
+        public async Task SaveChanges()
         {
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
         }
 
-        public void UpdateEmployee(Employee employee)
+        public async Task UpdateEmployee(Employee employee)
         {
             dbContext.Employees.Update(employee);
+            await dbContext.SaveChangesAsync();
         }
+
+       
     }
 }
